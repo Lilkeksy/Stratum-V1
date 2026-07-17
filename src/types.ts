@@ -10,6 +10,8 @@ export type Page =
   | 'login'
   | 'signup'
   | 'logout'
+  | 'language'
+  | 'onboarding'
 
 export type Theme = 'light' | 'dark'
 export type RiskLevel = 'Low' | 'Medium' | 'High'

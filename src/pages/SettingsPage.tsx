@@ -11,15 +11,21 @@ export function SettingsPage({ theme, onThemeChange, onToast }: {
   const [autoSummary, setAutoSummary] = useState(true)
   const [name, setName] = useState('Alex')
   const [responseStyle, setResponseStyle] = useState(42)
+  const [language, setLanguage] = useState(() => localStorage.getItem('stratum-language') || 'en')
+  const changeLanguage = (value: string) => {
+    setLanguage(value)
+    localStorage.setItem('stratum-language', value)
+    onToast('App language updated')
+  }
 
   return (
     <div className="page-content settings-page">
-      <section className="settings-profile panel"><div className="avatar avatar--large">AS</div><div><h2>Alex Sterling</h2><p>alex@acmecorp.com � Workspace administrator</p></div><button className="secondary-button" onClick={() => onToast('Profile changes saved')}>Edit profile</button></section>
+      <section className="settings-profile panel"><div className="avatar avatar--large">AS</div><div><h2>Alex Sterling</h2><p>alex@acmecorp.com · Workspace administrator</p></div><button className="secondary-button" onClick={() => onToast('Profile changes saved')}>Edit profile</button></section>
 
       <section className="settings-grid settings-grid--preferences">
         <article className="panel setting-card theme-setting"><div className="setting-card__heading"><span><Palette size={19} /></span><div><h3>Appearance</h3><p>Choose how Stratum looks across every page.</p></div></div><div className="theme-options"><button className={theme === 'light' ? 'theme-option theme-option--active' : 'theme-option'} onClick={() => onThemeChange('light')}><span className="theme-preview theme-preview--light"><i /><b /></span><Sun size={16} /><strong>Light</strong>{theme === 'light' && <Check size={15} />}</button><button className={theme === 'dark' ? 'theme-option theme-option--active' : 'theme-option'} onClick={() => onThemeChange('dark')}><span className="theme-preview theme-preview--dark"><i /><b /></span><Moon size={16} /><strong>Dark</strong>{theme === 'dark' && <Check size={15} />}</button></div></article>
 
-        <article className="panel setting-card"><div className="setting-card__heading"><span><UserRound size={19} /></span><div><h3>Personalization</h3><p>Tell Stratum how to tailor your experience.</p></div></div><label className="setting-field">What should Stratum call you?<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Your preferred name" /></label><div className="preference-row preference-row--compact"><span><Sparkles size={18} /></span><div><strong>Automatic quick summaries</strong><small>Show a short takeaway when you open a policy</small></div><button className={`toggle ${autoSummary ? 'toggle--on' : ''}`} onClick={() => setAutoSummary(!autoSummary)} aria-label="Toggle automatic summaries"><i /></button></div></article>
+        <article className="panel setting-card"><div className="setting-card__heading"><span><UserRound size={19} /></span><div><h3>Personalization</h3><p>Tell Stratum how to tailor your experience.</p></div></div><label className="setting-field">What should Stratum call you?<input value={name} onChange={(event) => setName(event.target.value)} placeholder="Your preferred name" /></label><label className="setting-field">App language<select value={language} onChange={(event) => changeLanguage(event.target.value)}><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option><option value="pt">Português</option><option value="yo">Yorùbá</option></select></label><div className="preference-row preference-row--compact"><span><Sparkles size={18} /></span><div><strong>Automatic quick summaries</strong><small>Show a short takeaway when you open a policy</small></div><button className={`toggle ${autoSummary ? 'toggle--on' : ''}`} onClick={() => setAutoSummary(!autoSummary)} aria-label="Toggle automatic summaries"><i /></button></div></article>
       </section>
 
       <section className="panel response-style-card"><div className="setting-card__heading"><span><SlidersHorizontal size={19} /></span><div><h3>Response style</h3><p>Control how much detail Stratum includes in policy summaries.</p></div><strong>{responseStyle < 34 ? 'Concise' : responseStyle > 66 ? 'Detailed' : 'Balanced'}</strong></div><div className="response-slider"><div className="response-slider__labels"><span>Concise<small>Quick takeaways</small></span><span>Detailed<small>More context and explanation</small></span></div><input type="range" min="0" max="100" value={responseStyle} onChange={(event) => setResponseStyle(Number(event.target.value))} style={{ '--slider-value': `${responseStyle}%` } as React.CSSProperties} /></div></section>
@@ -34,7 +40,7 @@ export function SettingsPage({ theme, onThemeChange, onToast }: {
         { icon: KeyRound, title: 'Single sign-on', detail: 'SAML SSO is connected' },
         { icon: Mail, title: 'Email preferences', detail: 'Weekly intelligence digest' },
       ].map(({ icon: Icon, title, detail }) => <button className="preference-row" key={title}><span><Icon size={18} /></span><div><strong>{title}</strong><small>{detail}</small></div><ChevronRight size={17} /></button>)}<div className="preference-row"><span><Bell size={18} /></span><div><strong>Real-time notifications</strong><small>Notify me about high-risk policy changes</small></div><button className={`toggle ${notifications ? 'toggle--on' : ''}`} onClick={() => setNotifications(!notifications)} aria-label="Toggle notifications"><i /></button></div></section>
-      <footer className="app-footer"><span>� 2026 Stratum Intelligence</span><button>Privacy policy</button><button>Terms of service</button><span><ShieldCheck size={14} /> Enterprise security</span></footer>
+      <footer className="app-footer"><span>© 2026 Stratum Intelligence</span><button>Privacy policy</button><button>Terms of service</button><span><ShieldCheck size={14} /> Enterprise security</span></footer>
     </div>
   )
 }
