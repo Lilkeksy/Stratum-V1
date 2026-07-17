@@ -1,32 +1,50 @@
-import { ChevronDown, Download, FilePlus2, FileStack, Filter, Grid2X2, List, MoreHorizontal, Search, SlidersHorizontal, X } from 'lucide-react'
+import { Check, Search, Scale, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { policies } from '../data'
-import { RiskBadge } from '../components/RiskBadge'
+
+type PolicyTag = 'All' | 'Social' | 'AI' | 'Workspace'
+
+const companyPolicies = [
+  { id: 'github', name: 'GitHub', tag: 'Workspace' as PolicyTag, version: 'v1', scanned: 'Jul 12, 2026', description: 'Code and repository data may be used to improve AI code-suggestion features unless disabled in settings.' },
+  { id: 'claude', name: 'Claude', tag: 'AI' as PolicyTag, version: 'v1', scanned: 'Jun 28, 2026', description: 'Conversations may be reviewed to improve models unless the user opts out in privacy controls.' },
+  { id: 'chatgpt', name: 'ChatGPT', tag: 'AI' as PolicyTag, version: 'v2', scanned: 'May 9, 2026', description: 'Adds enterprise data-retention controls and clarifies model-training opt-out choices.' },
+  { id: 'discord', name: 'Discord', tag: 'Social' as PolicyTag, version: 'v1', scanned: 'Apr 30, 2026', description: 'New arbitration clause and updated US-based account data handling terms.' },
+  { id: 'notion', name: 'Notion', tag: 'Workspace' as PolicyTag, version: 'v2', scanned: 'Feb 3, 2026', description: 'Clarifies AI feature data handling and adds workspace-level admin export controls.' },
+  { id: 'facebook', name: 'Facebook', tag: 'Social' as PolicyTag, version: 'v1', scanned: 'Jan 19, 2026', description: 'Auto-renewal language and subscription-based ad preference terms were updated.' },
+]
 
 export function LibraryPage({ globalQuery, onToast }: { globalQuery: string; onToast: (message: string) => void }) {
   const [query, setQuery] = useState('')
-  const [filter, setFilter] = useState('All policies')
-  const [grid, setGrid] = useState(false)
-  const [uploadOpen, setUploadOpen] = useState(false)
+  const [tag, setTag] = useState<PolicyTag>('All')
+  const [selected, setSelected] = useState<string[]>([])
+  const [comparisonOpen, setComparisonOpen] = useState(false)
   const value = query || globalQuery
-  const visible = useMemo(() => policies.filter((policy) => `${policy.title} ${policy.category} ${policy.jurisdiction}`.toLowerCase().includes(value.toLowerCase()) && (filter === 'All policies' || policy.status === filter)), [value, filter])
+  const visible = useMemo(() => companyPolicies.filter((policy) => `${policy.name} ${policy.description}`.toLowerCase().includes(value.toLowerCase()) && (tag === 'All' || policy.tag === tag)), [value, tag])
+
+  const toggle = (id: string) => setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id])
+  const selectedPolicies = companyPolicies.filter((policy) => selected.includes(policy.id))
 
   return (
-    <div className="page-content library-page">
-      <div className="page-actions page-actions--space"><div className="inline-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search policies, owners, or jurisdictions" /></div><button className="secondary-button"><Filter size={16} /> Filters</button><button className="primary-button" onClick={() => setUploadOpen(true)}><FilePlus2 size={16} /> Add policy</button></div>
-      <section className="library-toolbar"><div className="filter-tabs">{['All policies','Current','Review due','Draft'].map((item) => <button className={filter === item ? 'active' : ''} key={item} onClick={() => setFilter(item)}>{item}<span>{item === 'All policies' ? policies.length : policies.filter((p) => p.status === item).length}</span></button>)}</div><div className="view-toggles"><button className={!grid ? 'active' : ''} onClick={() => setGrid(false)} aria-label="List view"><List size={17} /></button><button className={grid ? 'active' : ''} onClick={() => setGrid(true)} aria-label="Grid view"><Grid2X2 size={17} /></button></div></section>
-
-      <section className={grid ? 'policy-grid' : 'panel library-table'}>
-        {!grid && <div className="library-table__head"><span>Policy</span><span>Category</span><span>Jurisdiction</span><span>Risk</span><span>Status</span><span>Updated</span><span /></div>}
-        {visible.map((policy) => grid ? (
-          <article className="policy-card" key={policy.id}><div><span className="document-icon"><FileStack size={19} /></span><button><MoreHorizontal size={18} /></button></div><h3>{policy.title}</h3><p>{policy.category} Â· {policy.jurisdiction}</p><div><RiskBadge level={policy.risk} /><span className={`status status--${policy.status.toLowerCase().replace(' ','-')}`}>{policy.status}</span></div><small>Updated {policy.updated}</small></article>
-        ) : (
-          <div className="library-table__row" key={policy.id}><span className="policy-name"><i className="document-icon"><FileStack size={18} /></i><strong>{policy.title}</strong></span><span>{policy.category}</span><span>{policy.jurisdiction}</span><RiskBadge level={policy.risk} /><span className={`status status--${policy.status.toLowerCase().replace(' ','-')}`}>{policy.status}</span><span>{policy.updated}</span><button aria-label="More options"><MoreHorizontal size={18} /></button></div>
-        ))}
-        {!visible.length && <div className="empty-state"><Search size={28} /><h3>No policies found</h3><p>Try a different search or filter.</p></div>}
+    <div className="page-content company-library">
+      <section className="library-intro"><div><h2>Policy Library</h2><p>Search companies and select two or more policies to compare what they collect, share, and retain.</p></div></section>
+      <section className="library-tools">
+        <div className="inline-search company-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search companies…" /></div>
+        <div className="policy-tags" aria-label="Filter policy types">{(['All','Social','AI','Workspace'] as PolicyTag[]).map((item) => <button key={item} className={tag === item ? 'policy-tag policy-tag--active' : 'policy-tag'} onClick={() => setTag(item)}>{item}</button>)}</div>
       </section>
+      <div className="selection-hint" aria-live="polite">
+        {!selected.length && 'Click on a policy to select.'}
+        {selected.length === 1 && <><span className="selection-count">1 selected</span> Select at least one more policy to compare.</>}
+        {selected.length > 1 && <><span className="selection-count">{selected.length} selected</span> Ready to compare selected policies.</>}
+      </div>
+      <section className="company-card-grid">
+        {visible.map((policy) => {
+          const active = selected.includes(policy.id)
+          return <button key={policy.id} className={`company-policy-card ${active ? 'company-policy-card--selected' : ''}`} onClick={() => toggle(policy.id)} aria-pressed={active}><span className="company-policy-card__top"><strong>{policy.name}</strong><i>{policy.version}</i></span><small>Scanned {policy.scanned} · {policy.tag}</small><p>{policy.description}</p><span className="company-policy-card__select">{active ? <><Check size={14} /> Selected</> : 'Select policy'}</span></button>
+        })}
+      </section>
+      {!visible.length && <div className="empty-state"><Search size={28} /><h3>No company policies found</h3><p>Try another search or category.</p></div>}
+      {selected.length > 0 && <div className="selection-bar"><div><strong>{selected.length} {selected.length === 1 ? 'policy' : 'policies'} selected</strong><span>{selected.length < 2 ? 'Choose one more to unlock comparison' : 'Compare data use and risk signals side by side'}</span></div><button className="text-button" onClick={() => setSelected([])}>Clear</button><button className="primary-button" disabled={selected.length < 2} onClick={() => setComparisonOpen(true)}><Scale size={16} /> Compare selected</button></div>}
 
-      {uploadOpen && <div className="modal-backdrop"><div className="modal"><div className="modal__header"><div><span className="section-label">Knowledge base</span><h2>Add a new policy</h2></div><button onClick={() => setUploadOpen(false)}><X size={18} /></button></div><label>Policy name<input placeholder="e.g. Data Retention Policy" /></label><div className="form-grid"><label>Category<button className="select-button">Select category <ChevronDown size={15} /></button></label><label>Jurisdiction<button className="select-button">Select region <ChevronDown size={15} /></button></label></div><button className="upload-zone"><Download size={24} /><strong>Drop a document here</strong><span>PDF, DOCX or TXT Â· up to 25MB</span></button><div className="modal__actions"><button className="secondary-button" onClick={() => setUploadOpen(false)}>Cancel</button><button className="primary-button" onClick={() => { setUploadOpen(false); onToast('Policy added to processing queue') }}>Add policy</button></div></div></div>}
+      {comparisonOpen && <div className="modal-backdrop"><section className="modal comparison-modal"><div className="modal__header"><div><span className="section-label">Demo comparison</span><h2>Policy Comparison</h2><p>A dummy comparison generated from your selected policies.</p></div><button onClick={() => setComparisonOpen(false)}><X size={18} /></button></div><div className="comparison-grid">{selectedPolicies.map((policy, index) => <article key={policy.id} className={index === 0 ? 'comparison-card comparison-card--baseline' : 'comparison-card'}><span>{index === 0 ? 'Baseline' : 'Selected'}</span><h3>{policy.name}</h3><p>{policy.description}</p><h4>Key signals</h4><ul><li className="signal signal--red">AI training language detected</li><li className="signal signal--amber">Data shared with service partners</li><li className="signal signal--green">Account controls available</li></ul></article>)}</div><div className="modal__actions"><button className="secondary-button" onClick={() => setComparisonOpen(false)}>Close</button><button className="primary-button" onClick={() => { setComparisonOpen(false); onToast('Comparison saved to your dashboard') }}>Save comparison</button></div></section></div>}
     </div>
   )
 }

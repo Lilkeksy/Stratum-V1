@@ -1,30 +1,29 @@
-import { Bell, ChevronDown, Search } from 'lucide-react'
+import { Bell, Search } from 'lucide-react'
+import type { Page } from '../types'
 
 const titles: Record<string, { title: string; eyebrow: string }> = {
-  overview: { title: 'Good morning, Alex', eyebrow: 'Command centre' },
-  dashboard: { title: 'Intelligence dashboard', eyebrow: 'Performance overview' },
-  assistant: { title: 'AI compliance assistant', eyebrow: 'Research workspace' },
-  library: { title: 'Policy library', eyebrow: 'Knowledge base' },
-  monitor: { title: 'Regulatory risk monitor', eyebrow: 'Live intelligence' },
-  settings: { title: 'Account settings', eyebrow: 'Workspace administration' },
+  dashboard: { title: 'Dashboard', eyebrow: 'Your policy intelligence' },
+  library: { title: 'Policy Library', eyebrow: 'Select policies to compare' },
+  demo: { title: 'Stratum', eyebrow: 'See the browser experience' },
+  help: { title: 'Help & Support', eyebrow: 'Answers when you need them' },
+  settings: { title: 'Settings', eyebrow: 'Make Stratum yours' },
 }
 
-export function Topbar({ page, query, onQuery }: { page: string; query: string; onQuery: (value: string) => void }) {
-  const copy = titles[page] ?? titles.overview
+export function Topbar({ page, query, onQuery, onNavigate }: {
+  page: string
+  query: string
+  onQuery: (value: string) => void
+  onNavigate: (page: Page) => void
+}) {
+  const copy = titles[page] ?? titles.dashboard
   return (
     <header className="topbar">
-      <div>
-        <span className="topbar__eyebrow">{copy.eyebrow}</span>
-        <h1>{copy.title}</h1>
-      </div>
+      <div><span className="topbar__eyebrow">{copy.eyebrow}</span><h1>{copy.title}</h1></div>
       <div className="topbar__actions">
-        <label className="search-box">
-          <Search size={17} />
-          <input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search Stratum" />
-          <kbd>⌘ K</kbd>
-        </label>
+        <label className="search-box"><Search size={17} /><input value={query} onChange={(event) => onQuery(event.target.value)} placeholder="Search Stratum" /></label>
         <button className="icon-button notification-button" aria-label="Notifications"><Bell size={19} /><span /></button>
-        <button className="workspace-switcher"><span className="avatar avatar--small">AC</span><span>Acme Corp</span><ChevronDown size={15} /></button>
+        <button className="header-login" onClick={() => onNavigate('login')}>Log in</button>
+        <button className="header-signup" onClick={() => onNavigate('signup')}>Sign up</button>
       </div>
     </header>
   )

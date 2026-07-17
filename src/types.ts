@@ -4,11 +4,14 @@ export type Page =
   | 'assistant'
   | 'library'
   | 'monitor'
+  | 'demo'
+  | 'help'
   | 'settings'
   | 'login'
   | 'signup'
   | 'logout'
 
+export type Theme = 'light' | 'dark'
 export type RiskLevel = 'Low' | 'Medium' | 'High'
 
 export interface Policy {

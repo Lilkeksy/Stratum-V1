@@ -1,44 +1,38 @@
-import { ArrowDownRight, ArrowUpRight, CalendarDays, ChevronDown, Clock3, Download, FileCheck2, ShieldCheck, TriangleAlert } from 'lucide-react'
-import { MetricCard } from '../components/MetricCard'
+import { ArrowRight, BadgeCheck, BookOpen, CalendarDays, FileText, FileUp, Layers3, ScanLine, Sparkles } from 'lucide-react'
+import type { Page } from '../types'
 
-const bars = [44, 62, 53, 72, 66, 84, 76, 92, 82, 96, 88, 94]
+const recentPolicies = [
+  { name: 'GitHub', date: 'Scanned Jul 12, 2026', summary: 'AI code-suggestion data use and repository controls.' },
+  { name: 'ChatGPT', date: 'Scanned May 9, 2026', summary: 'Enterprise retention and model-training preferences.' },
+  { name: 'Notion', date: 'Scanned Feb 3, 2026', summary: 'Workspace data handling and administrator controls.' },
+]
 
-export function DashboardPage({ onToast }: { onToast: (message: string) => void }) {
+export function DashboardPage({ onNavigate, onUpload }: {
+  onNavigate: (page: Page) => void
+  onUpload: () => void
+}) {
   return (
-    <div className="page-content">
-      <div className="page-actions"><button className="date-control"><CalendarDays size={16} /> Last 30 days <ChevronDown size={15} /></button><button className="secondary-button" onClick={() => onToast('Dashboard report downloaded')}><Download size={16} /> Export report</button></div>
-      <section className="metric-grid metric-grid--four">
-        <MetricCard label="Compliance score" value="92%" detail="4.8% improvement" icon={ShieldCheck} />
-        <MetricCard label="Policies reviewed" value="124" detail="18 this week" icon={FileCheck2} tone="blue" />
-        <MetricCard label="Avg. resolution" value="2.4d" detail="0.6 days faster" icon={Clock3} tone="violet" />
-        <MetricCard label="Critical exposure" value="3" detail="Down from 7" icon={TriangleAlert} tone="amber" />
+    <div className="page-content simple-dashboard">
+      <section className="account-overview-card panel">
+        <div className="account-identity"><span className="avatar account-avatar">JD</span><div><h2>John Doe</h2><p>john.doe@example.com</p></div></div>
+        <div className="account-facts">
+          <div><span><FileText size={17} /></span><strong>22</strong><small>Documents</small></div>
+          <div><span><ScanLine size={17} /></span><strong>47</strong><small>Policies scanned</small></div>
+          <div><span><CalendarDays size={17} /></span><strong>Jan 14, 2026</strong><small>Joined</small></div>
+          <div><span><BadgeCheck size={17} /></span><strong>Free Plan</strong><small>Current plan</small></div>
+        </div>
       </section>
 
-      <section className="content-grid content-grid--chart">
-        <article className="panel chart-panel">
-          <div className="panel__header"><div><span className="section-label">Compliance performance</span><h3>Risk posture over time</h3></div><span className="trend trend--positive"><ArrowUpRight size={15} /> 8.2%</span></div>
-          <div className="chart-scale"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
-          <div className="bar-chart">
-            {bars.map((height, index) => <div className="bar-column" key={index}><i style={{ height: `${height}%` }} /><span>{['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'][index]}</span></div>)}
-          </div>
-        </article>
-
-        <article className="panel distribution-panel">
-          <div className="panel__header"><div><span className="section-label">Risk distribution</span><h3>By severity</h3></div></div>
-          <div className="donut"><div><strong>856</strong><span>Total items</span></div></div>
-          <div className="legend"><p><i className="legend__dot legend__dot--green" /> Low risk <strong>68%</strong></p><p><i className="legend__dot legend__dot--amber" /> Medium risk <strong>23%</strong></p><p><i className="legend__dot legend__dot--red" /> High risk <strong>9%</strong></p></div>
-        </article>
+      <section className="dashboard-welcome">
+        <div><span className="pill"><Sparkles size={14} /> Policy intelligence made clear</span><h2>Understand policies without the legalese.</h2><p>Upload a policy, compare companies, or use Stratum directly on selected text to see what really matters.</p><div className="button-row"><button className="primary-button" onClick={onUpload}><FileUp size={16} /> Upload a policy</button><button className="secondary-button" onClick={() => onNavigate('library')}><BookOpen size={16} /> Browse library</button></div></div>
+        <span className="dashboard-welcome__mark"><Layers3 size={48} /></span>
       </section>
 
-      <section className="panel team-table">
-        <div className="panel__header"><div><span className="section-label">Team performance</span><h3>Review activity</h3></div><button className="text-button">View all activity</button></div>
-        <div className="table-head"><span>Team member</span><span>Documents</span><span>Resolved</span><span>Avg. response</span><span>Trend</span></div>
-        {[
-          ['Sarah Chen','SC','42','38','1.8 days','+12%','up'],
-          ['David Okafor','DO','36','31','2.2 days','+7%','up'],
-          ['Maya Rodriguez','MR','28','26','2.6 days','−3%','down'],
-        ].map((row) => <div className="table-row" key={row[0]}><span className="person-cell"><i className="avatar">{row[1]}</i><strong>{row[0]}</strong></span><span>{row[2]}</span><span>{row[3]}</span><span>{row[4]}</span><span className={row[6] === 'up' ? 'positive' : 'negative'}>{row[6] === 'up' ? <ArrowUpRight size={15} /> : <ArrowDownRight size={15} />}{row[5]}</span></div>)}
-      </section>
+      <section className="dashboard-section"><div className="dashboard-section__heading"><div><span className="section-label">Recent policies</span><h3>Continue where you left off</h3></div><button className="text-button" onClick={() => onNavigate('library')}>View policy library <ArrowRight size={15} /></button></div><div className="recent-policy-grid">{recentPolicies.map((policy) => <button key={policy.name} onClick={() => onNavigate('library')}><span>{policy.name.slice(0, 1)}</span><div><strong>{policy.name}</strong><small>{policy.date}</small><p>{policy.summary}</p></div><ArrowRight size={16} /></button>)}</div></section>
+
+      <section className="dashboard-section"><div className="dashboard-section__heading"><div><span className="section-label">Quick start</span><h3>Three ways to use Stratum</h3></div></div><div className="quick-start-grid"><button onClick={onUpload}><span>1</span><strong>Upload</strong><p>Add a screenshot, PDF, or policy document.</p></button><button onClick={() => onNavigate('library')}><span>2</span><strong>Compare</strong><p>Select two companies and compare policy signals.</p></button><button onClick={() => onNavigate('demo')}><span>3</span><strong>Summarize</strong><p>See how Stratum explains selected policy text.</p></button></div></section>
     </div>
   )
 }
+
+
