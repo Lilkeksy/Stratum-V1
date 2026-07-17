@@ -8,12 +8,15 @@ import { DashboardPage } from './pages/DashboardPage'
 import { DemoPage } from './pages/DemoPage'
 import { HelpPage } from './pages/HelpPage'
 import { LibraryPage } from './pages/LibraryPage'
+import { LanguagePage, OnboardingPage } from './pages/OnboardingPages'
 import { SettingsPage } from './pages/SettingsPage'
 import type { Page, Theme } from './types'
 
 const pageFromHash = (): Page => {
   const value = window.location.hash.replace('#/', '') as Page
-  const pages: Page[] = ['dashboard', 'library', 'demo', 'help', 'settings', 'login', 'signup', 'logout']
+  const pages: Page[] = ['dashboard', 'library', 'demo', 'help', 'settings', 'login', 'signup', 'logout', 'language', 'onboarding']
+  if (value === 'language' || value === 'onboarding' || value === 'login' || value === 'signup' || value === 'logout') return value
+  if (localStorage.getItem('stratum-onboarding-complete') !== 'true') return 'language'
   return pages.includes(value) ? value : 'dashboard'
 }
 
@@ -52,6 +55,8 @@ export default function App() {
   if (page === 'login') return <LoginPage onNavigate={navigate} />
   if (page === 'signup') return <SignupPage onNavigate={navigate} />
   if (page === 'logout') return <LogoutPage onNavigate={navigate} />
+  if (page === 'language') return <LanguagePage onNavigate={navigate} />
+  if (page === 'onboarding') return <OnboardingPage onNavigate={navigate} />
 
   return (
     <div className="app-shell">
@@ -69,4 +74,3 @@ export default function App() {
     </div>
   )
 }
-
