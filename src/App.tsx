@@ -2,32 +2,39 @@ import { useEffect, useState } from 'react'
 import { Sidebar } from './components/Sidebar'
 import { Topbar } from './components/Topbar'
 import { Toast } from './components/Toast'
-import { AssistantPage } from './pages/AssistantPage'
+import { UploadModal } from './components/UploadModal'
 import { LoginPage, LogoutPage, SignupPage } from './pages/AuthPages'
 import { DashboardPage } from './pages/DashboardPage'
+import { DemoPage } from './pages/DemoPage'
+import { HelpPage } from './pages/HelpPage'
 import { LibraryPage } from './pages/LibraryPage'
-import { MonitorPage } from './pages/MonitorPage'
-import { OverviewPage } from './pages/OverviewPage'
 import { SettingsPage } from './pages/SettingsPage'
-import type { Page } from './types'
+import type { Page, Theme } from './types'
 
 const pageFromHash = (): Page => {
   const value = window.location.hash.replace('#/', '') as Page
-  const pages: Page[] = ['overview', 'dashboard', 'assistant', 'library', 'monitor', 'settings', 'login', 'signup', 'logout']
-  return pages.includes(value) ? value : 'overview'
+  const pages: Page[] = ['dashboard', 'library', 'demo', 'help', 'settings', 'login', 'signup', 'logout']
+  return pages.includes(value) ? value : 'dashboard'
 }
 
 export default function App() {
   const [page, setPage] = useState<Page>(pageFromHash)
   const [query, setQuery] = useState('')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [uploadOpen, setUploadOpen] = useState(false)
   const [toast, setToast] = useState('')
+  const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('stratum-theme') as Theme) || 'light')
 
   useEffect(() => {
     const sync = () => setPage(pageFromHash())
     window.addEventListener('hashchange', sync)
     return () => window.removeEventListener('hashchange', sync)
   }, [])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('stratum-theme', theme)
+  }, [theme])
 
   useEffect(() => {
     if (!toast) return
@@ -48,17 +55,18 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar page={page} onNavigate={navigate} open={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
+      <Sidebar page={page} onNavigate={navigate} onUpload={() => setUploadOpen(true)} open={sidebarOpen} onToggle={() => setSidebarOpen((current) => !current)} />
       <main className="app-main">
-        <Topbar page={page} query={query} onQuery={setQuery} />
-        {page === 'overview' && <OverviewPage onNavigate={navigate} />}
-        {page === 'dashboard' && <DashboardPage onToast={setToast} />}
-        {page === 'assistant' && <AssistantPage onToast={setToast} />}
+        <Topbar page={page} query={query} onQuery={setQuery} onNavigate={navigate} />
+        {page === 'dashboard' && <DashboardPage onNavigate={navigate} onUpload={() => setUploadOpen(true)} />}
         {page === 'library' && <LibraryPage globalQuery={query} onToast={setToast} />}
-        {page === 'monitor' && <MonitorPage globalQuery={query} onToast={setToast} />}
-        {page === 'settings' && <SettingsPage onToast={setToast} />}
+        {page === 'demo' && <DemoPage />}
+        {page === 'help' && <HelpPage onToast={setToast} />}
+        {page === 'settings' && <SettingsPage theme={theme} onThemeChange={setTheme} onToast={setToast} />}
       </main>
+      <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onUploaded={(name) => setToast(`${name} added to your policy library`)} />
       {toast && <Toast message={toast} onClose={() => setToast('')} />}
     </div>
   )
 }
+
